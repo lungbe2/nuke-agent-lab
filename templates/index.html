@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nuke Agent Control Panel</title>
+  <!-- Bootstrap CSS -->
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
+    rel="stylesheet"
+  >
+  <style>
+    /* Diff line colors (kept for other uses) */
+    .diff-add { color: #0f5132; background: rgba(16, 185, 129, 0.08); display: block; }
+    .diff-rem { color: #842029; background: rgba(220, 38, 38, 0.06); display: block; }
+    .diff-meta { color: #664d03; background: rgba(250, 204, 21, 0.06); display: block; }
+    .diff-ctx { color: #6c757d; display: block; } /* context lines */
+
+    /* New diff-output styling */
+    pre.diff-output { white-space: pre-wrap; font-family: monospace; margin: 0; }
+    pre.diff-output .added { color: #0f5132; }   /* green */
+    pre.diff-output .removed { color: #842029; } /* red */
+    pre.diff-output .hunk { color: #b58900; }    /* yellow/orange for hunks */
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <h1 class="mb-4 text-center">Nuke Agent Control Panel</h1>
+
+    <form method="post" class="card p-4 shadow-sm">
+      <div class="mb-3">
+        <label class="form-label">File</label>
+        <input type="text" name="filename" class="form-control" placeholder="utils.py"
+               value="{{ request.form.get('filename', 'utils.py') }}" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Nuke</label>
+        <select name="nuke" class="form-select">
+          {% for n in nukes %}
+            <option value="{{n}}">{{n}}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Run Nuke</button>
+    </form>
+
+    {% if result %}
+      <div class="card mt-4 shadow-sm">
+        <div class="card-body">
+          {% if result.error %}
+            <div class="alert alert-danger">Error: {{ result.error }}</div>
+          {% else %}
+            <h5 class="card-title">Result</h5>
+            <p><b>File:</b> {{ result.file }}</p>
+            <p><b>Nuke:</b> {{ result.nuke }}</p>
+
+            <!-- Prompt row -->
+            <div class="row g-3 mt-3">
+              <div class="col-12">
+                <h6>Prompt</h6>
+                <pre class="bg-light p-2 border rounded mb-0" style="white-space: pre-wrap;">{{ result.prompt }}</pre>
+              </div>
+            </div>
+
+            <!-- Diff-style view: Original vs AI Refactor -->
+            <div class="row g-3 mt-3">
+              <div class="col-12 col-md-6">
+                <h6>Original Code</h6>
+                <pre class="bg-light p-2 border rounded mb-0" style="white-space: pre-wrap;">{{ result.preview }}</pre>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <h6>AI Refactor Output</h6>
+                <pre class="bg-light p-2 border rounded mb-0" style="white-space: pre-wrap;">{{ result.ai_output or "No AI output available." }}</pre>
+              </div>
+            </div>
+
+            <!-- Diff View (rendered line-by-line with coloring) -->
+            <div class="row mt-3">
+              <div class="col-12">
+                <h6>Diff View</h6>
+                <pre class="diff-output bg-white text-dark p-2 border rounded">
+{% if result.diff %}
+{% for line in result.diff.splitlines() %}
+  {% if line.startswith('+') and not line.startswith('+++') %}
+    <span class="added">{{ line|e }}</span>
+  {% elif line.startswith('-') and not line.startswith('---') %}
+    <span class="removed">{{ line|e }}</span>
+  {% elif line.startswith('@') %}
+    <span class="hunk">{{ line|e }}</span>
+  {% else %}
+    <span>{{ line|e }}</span>
+  {% endif %}
+  <br>
+{% endfor %}
+{% else %}
+  <span class="text-muted">No diff available.</span>
+{% endif %}
+                </pre>
+              </div>
+            </div>
+
+            <!-- Placeholder: integrate a diff/highlight library (diff2html, difflib, etc.) in future -->
+            <!-- TODO: later integrate diff highlighting (e.g. diff2html or a server-side formatter) to show additions/removals in green/red -->
+
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Bootstrap JS (optional, for interactivity) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

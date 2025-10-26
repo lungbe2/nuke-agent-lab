@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nuke-agent"
+version = "0.1.0"
+description = "Agent for applying code nukes"
+authors = [{ name = "Richard" }]
+dependencies = []

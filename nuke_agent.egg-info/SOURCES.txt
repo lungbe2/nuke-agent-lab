@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+utils.py
+nuke_agent.egg-info/PKG-INFO
+nuke_agent.egg-info/SOURCES.txt
+nuke_agent.egg-info/dependency_links.txt
+nuke_agent.egg-info/top_level.txt
+tests/test_nuke_agent.py
